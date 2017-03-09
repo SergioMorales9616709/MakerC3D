@@ -84,6 +84,7 @@ public class Inicio extends javax.swing.JFrame {
             parser.parse();
             jTextArea_Codigo3Dgenerado.setText(ControlC3D.getC3D());
             System.out.println("Finaliza la generación de C3D...");
+            ControlC3D.reiniciar();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
