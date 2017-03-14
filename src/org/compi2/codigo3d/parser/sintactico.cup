@@ -27,15 +27,15 @@ terminal MAS, MENOS, MULT, DIV, POT, PAR_IZQ, PAR_DER;
 terminal LOG_Y, LOG_O, LOG_NEG;
 terminal IGUAL, DIFERENTE, MAYOR, MENOR, MAYORIGUAL, MENORIGUAL;
 
-nonterminal NodoC3D inicial, expresion,relexp,combexp;
+nonterminal NodoC3D inicial, expresion,relexp,combexp,andexp;
 
+precedence left LOG_O;
+precedence left LOG_Y;
+precedence left LOG_NEG;
 precedence left MAS, MENOS;
 precedence left MULT, DIV; 
 precedence right POT; 
 precedence nonassoc IGUAL, DIFERENTE, MAYOR, MENOR, MAYORIGUAL, MENORIGUAL;
-precedence left LOG_O;
-precedence left LOG_Y;
-precedence left LOG_NEG;
 precedence nonassoc PAR_IZQ, PAR_DER;
 
 start with inicial;
@@ -47,23 +47,30 @@ inicial     ::= {: ControlC3D.reiniciar(); :} combexp:exp
                         if(exp.getCad() != null && exp.getCad() != "" ){
                             ControlC3D.agregarC3D("//Último valor: " + exp.getCad());
                         }else{
+                            ControlC3D.agregarC3D("\n"+exp.getLv()+":\n");
+                            ControlC3D.agregarC3D(exp.getLf()+":\n\n");
                             ControlC3D.agregarC3D("//Etiqueta(s) de verdadero: " + exp.getLv());
                             ControlC3D.agregarC3D("\n//Etiqueta(s) de falso: " + exp.getLf());
                         }
                     :};
 
-combexp     ::= combexp:izq LOG_O relexp:der
+combexp     ::= combexp:izq LOG_O andexp:der
                     {: 
                         String lv = ControlC3D.generarEtiqueta();
                         String lf = ControlC3D.generarEtiqueta();
-                        String c3d = izq.getC3d() + izq.getCad() + izq.getLf() + ":\n" + der.getC3d() + der.getCad() + der.getLv()+":\n";
+                        String c3d = izq.getC3d() + izq.getCad() + izq.getLf() + ":\n" + der.getC3d() + der.getCad();
+                        System.out.println("OR -> izq.lv:"+izq.getLv()+" izq.lv:"+izq.getLf()+"der.lv:"+der.getLv()+" der.lv:"+der.getLf());
                         RESULT = new NodoC3D(null,izq.getLv()+","+der.getLv(), der.getLf(),c3d);
                     :}
-            |   combexp:izq LOG_Y relexp:der
+            |   andexp:exp
+                    {: RESULT = exp; :}                        
+                ;
+andexp      ::= andexp:izq LOG_Y relexp:der
                     {: 
                         String lv = ControlC3D.generarEtiqueta();
                         String lf = ControlC3D.generarEtiqueta();
-                        String c3d = izq.getC3d() + izq.getCad() + izq.getLv() + ":\n" + der.getC3d() + der.getCad() + der.getLf()+":\n";
+                        String c3d = izq.getC3d() + izq.getCad() + izq.getLv() + ":\n" + der.getC3d() + der.getCad();
+                        System.out.println("AND -> izq.lv:"+izq.getLv()+" izq.lv:"+izq.getLf()+"der.lv:"+der.getLv()+" der.lv:"+der.getLf());
                         RESULT = new NodoC3D(null,der.getLv(),izq.getLf()+","+der.getLf(),c3d);
                     :}
             |   relexp:exp
@@ -158,7 +165,7 @@ expresion   ::= expresion:izq MAS expresion:der
                         String c3d = temp + " = not " + exp.getCad() + ";\n";
                         RESULT = new NodoC3D(temp,exp.getLf(),exp.getLv(),c3d);
                     :}
-            |   PAR_IZQ expresion:exp PAR_DER   
+            |   PAR_IZQ combexp:exp PAR_DER   
                     {: RESULT = exp; :}
             |   ID:id           
                     {: RESULT = new NodoC3D(id); :}
