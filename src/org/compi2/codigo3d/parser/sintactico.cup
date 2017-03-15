@@ -73,6 +73,15 @@ andexp      ::= andexp:izq LOG_Y relexp:der
                         System.out.println("AND -> izq.lv:"+izq.getLv()+" izq.lv:"+izq.getLf()+"der.lv:"+der.getLv()+" der.lv:"+der.getLf());
                         RESULT = new NodoC3D(null,der.getLv(),izq.getLf()+","+der.getLf(),c3d);
                     :}
+            |   LOG_NEG combexp:exp 
+                    {: 
+                        //String temp = ControlC3D.generaTemp();
+                        //String c3d = temp + " = not " + exp.getCad() + ";\n";
+                        if(exp.getCad() != null)
+                            RESULT = new NodoC3D(null,exp.getLf(),exp.getLv(),exp.getC3d());
+                        else
+                            RESULT = new NodoC3D("!"+exp.getCad(),exp.getLf(),exp.getLv(),exp.getC3d());
+                    :}
             |   relexp:exp
                     {: RESULT = exp; :}                        
                 ;
@@ -158,12 +167,6 @@ expresion   ::= expresion:izq MAS expresion:der
                         String temp = ControlC3D.generaTemp();
                         String c3d = temp + " = - " + exp.getCad() + ";\n";
                         RESULT = new NodoC3D(temp,null,null,exp.getC3d()+c3d);
-                    :}
-            |   LOG_NEG expresion:exp 
-                    {: 
-                        String temp = ControlC3D.generaTemp();
-                        String c3d = temp + " = not " + exp.getCad() + ";\n";
-                        RESULT = new NodoC3D(temp,exp.getLf(),exp.getLv(),c3d);
                     :}
             |   PAR_IZQ combexp:exp PAR_DER   
                     {: RESULT = exp; :}
