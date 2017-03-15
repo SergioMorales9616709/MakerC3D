@@ -31,12 +31,12 @@ nonterminal NodoC3D inicial, expresion,relexp,combexp,andexp;
 
 precedence left LOG_O;
 precedence left LOG_Y;
-precedence left LOG_NEG;
 precedence left MAS, MENOS;
 precedence left MULT, DIV; 
 precedence right POT; 
 precedence nonassoc IGUAL, DIFERENTE, MAYOR, MENOR, MAYORIGUAL, MENORIGUAL;
 precedence nonassoc PAR_IZQ, PAR_DER;
+precedence right LOG_NEG;
 
 start with inicial;
 
@@ -72,15 +72,6 @@ andexp      ::= andexp:izq LOG_Y relexp:der
                         String c3d = izq.getC3d() + izq.getCad() + izq.getLv() + ":\n" + der.getC3d() + der.getCad();
                         System.out.println("AND -> izq.lv:"+izq.getLv()+" izq.lv:"+izq.getLf()+"der.lv:"+der.getLv()+" der.lv:"+der.getLf());
                         RESULT = new NodoC3D(null,der.getLv(),izq.getLf()+","+der.getLf(),c3d);
-                    :}
-            |   LOG_NEG combexp:exp 
-                    {: 
-                        //String temp = ControlC3D.generaTemp();
-                        //String c3d = temp + " = not " + exp.getCad() + ";\n";
-                        if(exp.getCad() != null)
-                            RESULT = new NodoC3D(null,exp.getLf(),exp.getLv(),exp.getC3d());
-                        else
-                            RESULT = new NodoC3D("!"+exp.getCad(),exp.getLf(),exp.getLv(),exp.getC3d());
                     :}
             |   relexp:exp
                     {: RESULT = exp; :}                        
@@ -161,6 +152,18 @@ expresion   ::= expresion:izq MAS expresion:der
                         String temp = ControlC3D.generaTemp();
                         String c3d = temp + " = " + izq.getCad() + " ^ " + der.getCad() + ";\n";
                         RESULT = new NodoC3D(temp,null,null,izq.getC3d()+der.getC3d()+c3d);
+                    :}
+            |   LOG_NEG expresion:exp 
+                    {: 
+                        //String temp = ControlC3D.generaTemp();
+                        //String c3d = temp + " = not " + exp.getCad() + ";\n";
+                        if(exp.getCad() != null && exp.getCad().length()>0){
+                            String temp = ControlC3D.generaTemp();
+                            String c3d = temp + " = NOT " + exp.getCad() + ";\n";
+                            RESULT = new NodoC3D(temp,exp.getLf(),exp.getLv(),exp.getC3d()+c3d);
+                        }    
+                        else
+                            RESULT = new NodoC3D(null,exp.getLf(),exp.getLv(),exp.getC3d());
                     :}
             |   MENOS expresion:exp 
                     {: 
